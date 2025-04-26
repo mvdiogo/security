@@ -1,0 +1,16 @@
+services:
+  vulnerable-server:
+    build: .
+    container_name: vulnerable_server
+    ports:
+      - "2222:22"
+      - "21:21"
+      - "8000:80"
+      - "3306:3306"
+      - "5432:5432"
+      - "6379:6379"
+      - "23:23"
+      - "111:111"
+      - "2049:2049"
+      - "161:161/udp"
+    privileged: true
