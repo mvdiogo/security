@@ -31,9 +31,13 @@ grep -q "^PermitRootLogin yes" /etc/ssh/sshd_config && add_row "SSH" "Root login
 grep -q "MaxAuthTries 10" /etc/ssh/sshd_config && add_row "SSH" "Limite alto de tentativas" "VULNERÁVEL" || add_row "SSH" "Limite alto de tentativas" "OK"
 
 # FTP
-grep -q "anonymous_enable=YES" /etc/vsftpd.conf && add_row "FTP" "FTP Anônimo ativo" "VULNERÁVEL" || add_row "FTP" "FTP Anônimo ativo" "OK"
-grep -q "ssl_enable=NO" /etc/vsftpd.conf && add_row "FTP" "SSL/TLS desabilitado" "VULNERÁVEL" || add_row "FTP" "SSL/TLS desabilitado" "OK"
-
+grep -q "<Anonymous" /etc/proftpd/proftpd.conf && \
+  add_row "FTP" "FTP Anônimo ativo" "VULNERÁVEL" || \
+  add_row "FTP" "FTP Anônimo ativo" "OK"
+(grep -q "TLSEngine on" /etc/proftpd/proftpd.conf && \
+  grep -q "TLSRequired on" /etc/proftpd/proftpd.conf) && \
+  add_row "FTP" "SSL/TLS desabilitado" "OK" || \
+  add_row "FTP" "SSL/TLS desabilitado" "VULNERÁVEL"
 # Samba
 grep -q "guest ok = yes" /etc/samba/smb.conf && add_row "Samba" "Compartilhamento Guest" "VULNERÁVEL" || add_row "Samba" "Compartilhamento Guest" "OK"
 ls -l /srv/samba/ | grep -q drwxrwxrwx && add_row "Samba" "Permissões 777" "VULNERÁVEL" || add_row "Samba" "Permissões 777" "OK"
@@ -55,7 +59,7 @@ grep -q "^# requirepass" /etc/redis/redis.conf && add_row "Redis" "Sem senha con
 grep -q "bind 0.0.0.0" /etc/redis/redis.conf && add_row "Redis" "Exposto em 0.0.0.0" "VULNERÁVEL" || add_row "Redis" "Exposto em 0.0.0.0" "OK"
 
 # Telnet
-systemctl is-active telnet.socket | grep -q active && add_row "Telnet" "Serviço ativo" "VULNERÁVEL" || add_row "Telnet" "Serviço ativo" "OK"
+systemctl is-active telnet | grep -q active && add_row "Telnet" "Serviço ativo" "VULNERÁVEL" || add_row "Telnet" "Serviço ativo" "OK"
 
 # NFS
 grep -q "\*" /etc/exports && add_row "NFS" "Export inseguro" "VULNERÁVEL" || add_row "NFS" "Export inseguro" "OK"

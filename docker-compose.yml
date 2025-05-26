@@ -1,16 +1,89 @@
+version: '3.8'
+
 services:
   vulnerable-server:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
     container_name: vulnerable_server
+    hostname: vulnerable-lab
     ports:
+      # SSH
       - "2222:22"
+      # FTP
       - "21:21"
-      - "8000:80"
+      - "10000-10100:10000-10100"  # FTP passive ports
+      # HTTP
+      - "8080:80"
+      # MySQL/MariaDB
       - "3306:3306"
+      # PostgreSQL
       - "5432:5432"
+      # Redis
       - "6379:6379"
+      # Telnet
       - "23:23"
+      # RPC/NFS - Note: NFS often uses various ports (portmapper 111, NLM, mountd, etc.)
+      # Exposing only 111 and 2049 might not be sufficient for all NFS versions/setups
+      # For a lab, this should be a good start.
       - "111:111"
+      - "111:111/udp"
       - "2049:2049"
+      - "2049:2049/udp"
+      # SNMP
       - "161:161/udp"
-    privileged: true
+      # Samba
+      - "139:139"
+      - "445:445"
+    volumes:
+      # Persist important data
+      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/15/main
+      - redis_data:/var/lib/redis
+      - www_data:/var/www/html
+      - logs:/var/log
+    environment:
+      # These might be overridden by install_insecure_services.sh but are good defaults
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_ROOT_PASSWORD=
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    privileged: true # Use with caution, grants extensive capabilities
+    cap_add:
+      - SYS_ADMIN # Needed for NFS and some other system-level operations
+      - NET_ADMIN # Useful for network configurations
+      - DAC_OVERRIDE # Bypass file read/write/execute permission checks
+    security_opt:
+      - seccomp:unconfined # Disable seccomp filtering for broader functionality
+    restart: unless-stopped
+    networks:
+      - vulnerable_network
+
+  # Additional service for network testing
+  target-machine:
+    image: debian:12
+    container_name: target_machine
+    hostname: target-lab
+    command: tail -f /dev/null # Keep container running
+    networks:
+      - vulnerable_network
+    volumes:
+      - /tmp:/shared # Example shared volume
+
+volumes:
+  mysql_data:
+    driver: local
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  www_data:
+    driver: local
+  logs:
+    driver: local
+
+networks:
+  vulnerable_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

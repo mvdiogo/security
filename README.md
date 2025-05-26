@@ -86,7 +86,7 @@ O relatório `vulnerability_report.html` será criado no diretório atual.
 
 1. Build e inicialize o container:
 ```bash
-docker-compose up -d --build
+docker-compose up -d --build --force-recreate
 ```
 
 2. Acesse o container:
@@ -105,6 +105,10 @@ docker exec -it vulnerable_server bash
 ```bash
 docker cp vulnerable_server:/root/vulnerability_report.html .
 xdg-open vulnerability_report.html
+```
+5. Para analisar o status do supervisor
+```bash
+docker logs vulnerable_server
 ```
 
 ---
