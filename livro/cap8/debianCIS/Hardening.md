@@ -410,7 +410,7 @@ cat > /etc/audit/rules.d/cis.rules << 'EOF'
 -a always,exit -F arch=b64 -S init_module -S delete_module -k modules
 
 # 4.1.17 Ensure the audit configuration is immutable
--e 2
+# Nota: A flag -e 2 será aplicada via auditctl após carregar as regras
 EOF
 
 # Encontrar arquivos SUID/SGID e adicionar às regras
@@ -423,9 +423,11 @@ done
 systemctl enable auditd
 systemctl start auditd
 
-# Aplicar novas regras
+# Aplicar novas regras e tornar imutável
 augenrules --load
-systemctl restart auditd
+
+# Tornar as regras imutáveis (deve ser feito após o carregamento)
+auditctl -e 2
 
 echo "Configuração de auditoria concluída"
 ```
@@ -552,10 +554,11 @@ ufw default deny outgoing
 ufw default deny forward
 
 # Permitir conexões essenciais de saída
-ufw allow out 53    # DNS
-ufw allow out 80    # HTTP
-ufw allow out 443   # HTTPS
-ufw allow out 123   # NTP
+ufw allow out 53/udp    # DNS
+ufw allow out 53/tcp    # DNS over TCP
+ufw allow out 80/tcp    # HTTP
+ufw allow out 443/tcp   # HTTPS
+ufw allow out 123/udp   # NTP
 
 # Permitir SSH (ajustar porta se necessário)
 ufw allow in 22/tcp
@@ -754,29 +757,54 @@ cp /etc/pam.d/common-auth /etc/pam.d/common-auth.backup.$(date +%Y%m%d)
 cp /etc/login.defs /etc/login.defs.backup.$(date +%Y%m%d)
 
 # 5.3.1 Configurar política de senhas
-cat > /etc/pam.d/common-password << 'EOF'
-# CIS Benchmark PAM Password Configuration
-password requisite pam_pwquality.so retry=3 minlen=14 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1
-password [success=1 default=ignore] pam_unix.so obscure use_authtok try_first_pass sha512 remember=5
-password requisite pam_deny.so
-password required pam_permit.so
-EOF
-
-# 5.3.2 Configurar bloqueio de conta
-cat > /etc/pam.d/common-auth << 'EOF'
-# CIS Benchmark PAM Auth Configuration
-auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900
-auth [success=1 default=ignore] pam_unix.so nullok_secure
-auth requisite pam_deny.so
-auth required pam_permit.so
-auth optional pam_cap.so
-EOF
-
-# Instalar libpam-pwquality se não estiver instalado
+# Verificar se libpam-pwquality está instalado
 if ! dpkg -l | grep -q libpam-pwquality; then
     apt-get update
     apt-get install -y libpam-pwquality
 fi
+
+# Backup e edição do arquivo common-password
+if grep -q "pam_pwquality.so" /etc/pam.d/common-password; then
+    # Substituir linha existente
+    sed -i 's/^password.*pam_pwquality.so.*/password requisite pam_pwquality.so retry=3 minlen=14 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1/' /etc/pam.d/common-password
+else
+    # Adicionar se não existir (caso raro)
+    sed -i '/^password.*pam_unix.so/i password requisite pam_pwquality.so retry=3 minlen=14 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1' /etc/pam.d/common-password
+fi
+
+# Configurar remember para pam_unix.so
+sed -i 's/^password.*pam_unix.so.*/password [success=1 default=ignore] pam_unix.so obscure use_authtok try_first_pass sha512 remember=5/' /etc/pam.d/common-password
+
+# 5.3.2 Configurar bloqueio de conta com pam_faillock
+# Instalar libpam-modules se não estiver instalado
+if ! dpkg -l | grep -q libpam-modules; then
+    apt-get update
+    apt-get install -y libpam-modules
+fi
+
+# Configurar pam_faillock no common-auth
+if ! grep -q "pam_faillock.so" /etc/pam.d/common-auth; then
+    # Adicionar pam_faillock antes da primeira linha auth
+    sed -i '1i auth required pam_faillock.so preauth audit silent deny=5 unlock_time=900' /etc/pam.d/common-auth
+    sed -i '/^auth.*pam_unix.so/a auth [default=die] pam_faillock.so authfail audit deny=5 unlock_time=900' /etc/pam.d/common-auth
+    sed -i '/^auth.*pam_permit.so/i auth sufficient pam_faillock.so authsucc audit deny=5 unlock_time=900' /etc/pam.d/common-auth
+fi
+
+# Configurar pam_faillock no common-account
+if ! grep -q "pam_faillock.so" /etc/pam.d/common-account; then
+    sed -i '1i account required pam_faillock.so' /etc/pam.d/common-account
+fi
+
+# Criar arquivo de configuração para faillock
+cat > /etc/security/faillock.conf << 'EOF'
+# CIS Benchmark Faillock Configuration
+audit
+silent
+deny = 5
+fail_interval = 900
+unlock_time = 900
+root_unlock_time = 60
+EOF
 
 # 5.4.1 Configurar parâmetros de senha em login.defs
 cat > /etc/login.defs << 'EOF'
@@ -839,7 +867,7 @@ chmod 644 /etc/passwd
 
 # 6.1.3 Ensure permissions on /etc/shadow are configured
 chown root:shadow /etc/shadow
-chmod 640 /etc/shadow
+chmod 0640 /etc/shadow
 
 # 6.1.4 Ensure permissions on /etc/group are configured
 chown root:root /etc/group
@@ -847,7 +875,7 @@ chmod 644 /etc/group
 
 # 6.1.5 Ensure permissions on /etc/gshadow are configured
 chown root:shadow /etc/gshadow
-chmod 640 /etc/gshadow
+chmod 0640 /etc/gshadow
 
 # 6.1.6 Ensure permissions on /etc/passwd- are configured
 if [ -f /etc/passwd- ]; then
@@ -858,7 +886,7 @@ fi
 # 6.1.7 Ensure permissions on /etc/shadow- are configured
 if [ -f /etc/shadow- ]; then
     chown root:shadow /etc/shadow-
-    chmod 640 /etc/shadow-
+    chmod 0640 /etc/shadow-
 fi
 
 # 6.1.8 Ensure permissions on /etc/group- are configured
@@ -870,7 +898,7 @@ fi
 # 6.1.9 Ensure permissions on /etc/gshadow- are configured
 if [ -f /etc/gshadow- ]; then
     chown root:shadow /etc/gshadow-
-    chmod 640 /etc/gshadow-
+    chmod 0640 /etc/gshadow-
 fi
 
 # SSH key permissions
@@ -1263,7 +1291,175 @@ chmod +x *.sh
 
 ## 10. Considerações Importantes
 
-### 10.1 Antes de Implementar
+### 10.1 Correções e Melhorias Implementadas
+- **UFW Firewall**: Corrigido para usar comandos separados por porta com protocolos específicos (TCP/UDP)
+- **PAM pwquality**: Implementado edição in-place do arquivo common-password em vez de sobrescrever
+- **pam_faillock**: Substituído pam_tally2 deprecado pelo pam_faillock moderno do Debian 12
+- **Auditd Imutabilidade**: Corrigido para usar auditctl -e 2 após carregamento das regras
+- **Permissões Shadow**: Ajustado para usar 0640 (octal explícito) em arquivos shadow/gshadow
+
+### 10.2 Validações Adicionais Necessárias
+```bash
+#!/bin/bash
+# validation_extras.sh - Validações adicionais para as correções
+
+echo "=== VALIDAÇÕES EXTRAS PÓS-CORREÇÃO ==="
+
+# Verificar pam_faillock
+echo "[PAM] Verificando pam_faillock..."
+if grep -q "pam_faillock.so" /etc/pam.d/common-auth; then
+    echo "✓ pam_faillock configurado em common-auth"
+else
+    echo "✗ pam_faillock NÃO encontrado em common-auth"
+fi
+
+if [ -f /etc/security/faillock.conf ]; then
+    echo "✓ Arquivo faillock.conf existe"
+    if grep -q "deny = 5" /etc/security/faillock.conf; then
+        echo "✓ Configuração de deny correta"
+    fi
+else
+    echo "✗ Arquivo faillock.conf NÃO existe"
+fi
+
+# Verificar pwquality
+echo "[PAM] Verificando pwquality..."
+if grep -q "pam_pwquality.so.*minlen=14" /etc/pam.d/common-password; then
+    echo "✓ pam_pwquality configurado corretamente"
+else
+    echo "✗ pam_pwquality NÃO configurado corretamente"
+fi
+
+# Verificar auditd imutabilidade
+echo "[AUDIT] Verificando imutabilidade..."
+if auditctl -s | grep -q "enabled 2"; then
+    echo "✓ Auditd está em modo imutável"
+else
+    echo "✗ Auditd NÃO está em modo imutável"
+fi
+
+# Verificar permissões shadow
+echo "[PERMS] Verificando permissões shadow..."
+shadow_perm=$(stat -c "%a" /etc/shadow 2>/dev/null)
+if [ "$shadow_perm" = "640" ]; then
+    echo "✓ /etc/shadow tem permissões 640"
+else
+    echo "✗ /etc/shadow tem permissões $shadow_perm (deveria ser 640)"
+fi
+
+gshadow_perm=$(stat -c "%a" /etc/gshadow 2>/dev/null)
+if [ "$gshadow_perm" = "640" ]; then
+    echo "✓ /etc/gshadow tem permissões 640"
+else
+    echo "✗ /etc/gshadow tem permissões $gshadow_perm (deveria ser 640)"
+fi
+
+# Verificar UFW rules
+echo "[UFW] Verificando regras de firewall..."
+if ufw status numbered | grep -q "53/udp.*ALLOW OUT"; then
+    echo "✓ Regra DNS UDP configurada"
+else
+    echo "✗ Regra DNS UDP NÃO encontrada"
+fi
+
+if ufw status numbered | grep -q "443/tcp.*ALLOW OUT"; then
+    echo "✓ Regra HTTPS configurada"
+else
+    echo "✗ Regra HTTPS NÃO encontrada"
+fi
+
+echo "=== FIM DAS VALIDAÇÕES EXTRAS ==="
+```
+
+### 10.3 Script de Correção para Sistemas Já Implementados
+```bash
+#!/bin/bash
+# fix_existing_implementation.sh - Corrige implementações anteriores
+
+echo "=== APLICANDO CORREÇÕES EM IMPLEMENTAÇÃO EXISTENTE ==="
+
+# 1. Corrigir UFW - remover regras incorretas e adicionar corretas
+echo "Corrigindo regras UFW..."
+ufw --force reset
+ufw default deny incoming
+ufw default deny outgoing
+ufw default deny forward
+
+# Regras corretas com protocolos específicos
+ufw allow out 53/udp
+ufw allow out 53/tcp
+ufw allow out 80/tcp
+ufw allow out 443/tcp
+ufw allow out 123/udp
+ufw allow in 22/tcp
+ufw allow in on lo
+ufw allow out on lo
+ufw logging on
+ufw --force enable
+
+# 2. Corrigir PAM faillock se pam_tally2 estiver presente
+echo "Corrigindo configuração PAM..."
+if grep -q "pam_tally2" /etc/pam.d/common-auth; then
+    echo "Removendo pam_tally2 e configurando pam_faillock..."
+    
+    # Remover linhas pam_tally2
+    sed -i '/pam_tally2/d' /etc/pam.d/common-auth
+    
+    # Adicionar pam_faillock se não existir
+    if ! grep -q "pam_faillock.so" /etc/pam.d/common-auth; then
+        # Backup
+        cp /etc/pam.d/common-auth /etc/pam.d/common-auth.backup.$(date +%Y%m%d)
+        
+        # Adicionar configurações faillock
+        sed -i '1i auth required pam_faillock.so preauth audit silent deny=5 unlock_time=900' /etc/pam.d/common-auth
+        sed -i '/^auth.*pam_unix.so/a auth [default=die] pam_faillock.so authfail audit deny=5 unlock_time=900' /etc/pam.d/common-auth
+        sed -i '/^auth.*pam_permit.so/i auth sufficient pam_faillock.so authsucc audit deny=5 unlock_time=900' /etc/pam.d/common-auth
+        
+        # Configurar common-account
+        if ! grep -q "pam_faillock.so" /etc/pam.d/common-account; then
+            sed -i '1i account required pam_faillock.so' /etc/pam.d/common-account
+        fi
+        
+        # Criar configuração faillock
+        cat > /etc/security/faillock.conf << 'EOF'
+audit
+silent
+deny = 5
+fail_interval = 900
+unlock_time = 900
+root_unlock_time = 60
+EOF
+    fi
+fi
+
+# 3. Corrigir permissões shadow com octal explícito
+echo "Corrigindo permissões de arquivos shadow..."
+chmod 0640 /etc/shadow
+chmod 0640 /etc/gshadow
+[ -f /etc/shadow- ] && chmod 0640 /etc/shadow-
+[ -f /etc/gshadow- ] && chmod 0640 /etc/gshadow-
+
+# 4. Corrigir auditd imutabilidade
+echo "Corrigindo configuração auditd..."
+if systemctl is-active --quiet auditd; then
+    # Remover -e 2 do arquivo de regras se existir
+    sed -i '/-e 2/d' /etc/audit/rules.d/*.rules
+    
+    # Recarregar regras
+    augenrules --load
+    
+    # Aplicar imutabilidade via auditctl
+    auditctl -e 2
+fi
+
+# 5. Validar correções
+echo "Executando validação das correções..."
+bash validation_extras.sh
+
+echo "=== CORREÇÕES APLICADAS ==="
+```
+
+### 10.4 Antes de Implementar
 - **Sempre teste em ambiente de desenvolvimento primeiro**
 - **Faça backup completo do sistema**
 - **Tenha acesso console/físico disponível**
@@ -1282,5 +1478,3 @@ chmod +x *.sh
 - Adaptar regras de firewall para aplicações
 - Configurar servidor de logs centralizado se disponível
 - Ajustar políticas de senha conforme política organizacional
-
-Este guia fornece uma base sólida para implementação do CIS Benchmark no Debian 12, mas deve ser adaptado às necessidades específicas de cada ambiente.
