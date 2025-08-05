@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório DAST</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Relatório DAST</h1>
+        <div class="summary">
+            <p><strong>Alvo:</strong> {{ report.target }}</p>
+            <p><strong>Data do Scan:</strong> {{ report.scan_date }}</p>
+            <p><strong>URLs Escaneadas:</strong> {{ report.urls_scanned }}</p>
+            <p><strong>Vulnerabilidades Encontradas:</strong> {{ report.vulnerabilities_found }}</p>
+        </div>
+        
+        <h2>Sumário</h2>
+        <ul class="summary-list">
+            <li class="high">Alta Severidade: {{ report.summary.high }}</li>
+            <li class="medium">Média Severidade: {{ report.summary.medium }}</li>
+            <li class="low">Baixa Severidade: {{ report.summary.low }}</li>
+        </ul>
+
+        <h2>Detalhes das Vulnerabilidades</h2>
+        {% if report.vulnerabilities_found > 0 %}
+            {% for vuln in report.vulnerabilities %}
+            <div class="vulnerability {{ vuln.severity.lower() }}">
+                <h3>{{ vuln.type }}</h3>
+                <p><strong>URL:</strong> {{ vuln.url }}</p>
+                <p><strong>Parâmetro:</strong> {{ vuln.parameter or 'N/A' }}</p>
+                <p><strong>Payload:</strong> {{ vuln.payload or 'N/A' }}</p>
+                <p><strong>Severidade:</strong> {{ vuln.severity }}</p>
+                <p><strong>Descrição:</strong> {{ vuln.description }}</p>
+                <p><strong>Mitigação:</strong> {{ vuln.mitigation }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="success">Nenhuma vulnerabilidade encontrada!</p>
+        {% endif %}
+        <a href="/" class="back-button">Voltar</a>
+    </div>
+</body>
+</html>

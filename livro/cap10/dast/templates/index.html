@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>DAST Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>DAST Scanner</h1>
+        <p>Insira a URL alvo para iniciar o scan de segurança.</p>
+        <form action="/scan" method="post">
+            <label for="target_url">URL Alvo:</label>
+            <input type="text" id="target_url" name="target_url" placeholder="https://example.com" required>
+            <button type="submit">Iniciar Scan</button>
+        </form>
+    </div>
+</body>
+</html>
