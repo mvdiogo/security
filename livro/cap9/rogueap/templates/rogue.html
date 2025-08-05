@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rogue Access Points</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Rogue Access Points</h1>
+    <a href="/">⬅ Voltar</a>
+    <table>
+        <tr><th>Data</th><th>SSID</th><th>BSSID</th><th>Razão</th><th>Confiança</th></tr>
+        {% for rogue in rogues %}
+        <tr>
+            <td>{{ rogue[1] }}</td>
+            <td>{{ rogue[3] }}</td>
+            <td>{{ rogue[2] }}</td>
+            <td>{{ rogue[4] }}</td>
+            <td>{{ rogue[5] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

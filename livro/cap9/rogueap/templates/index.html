@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Access Points</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Access Points Detectados</h1>
+    <a href="/scan">🔄 Escanear</a> | <a href="/rogue">🚨 Ver Rogues</a>
+    <table>
+        <tr><th>SSID</th><th>BSSID</th><th>Canal</th><th>Encriptação</th><th>Sinal</th></tr>
+        {% for ap in aps %}
+        <tr>
+            <td>{{ ap[2] }}</td>
+            <td>{{ ap[1] }}</td>
+            <td>{{ ap[3] }}</td>
+            <td>{{ ap[4] }}</td>
+            <td>{{ ap[5] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

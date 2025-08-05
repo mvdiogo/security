@@ -131,10 +131,3 @@ Distribuído sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais det
 
 Contribuições são bem-vindas! Relate problemas, envie melhorias ou abra PRs.
 
----
-
-## 📧 Contato
-
-Autor: \[Seu Nome]
-Email: [seuemail@example.com](mailto:seuemail@example.com)
-

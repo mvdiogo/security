@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberTraffic - Dashboard de Monitoramento</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #4361ee;
+      --secondary: #3f37c9;
+      --success: #4cc9f0;
+      --danger: #f72585;
+      --warning: #f8961e;
+      --dark: #1e1e2d;
+      --light: #f8f9fc;
+    }
+    
+    body {
+      background-color: #f5f7fb;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .dashboard-header {
+      background: linear-gradient(120deg, var(--primary), var(--secondary));
+      border-radius: 10px;
+      padding: 20px;
+      color: white;
+      box-shadow: 0 4px 20px rgba(67, 97, 238, 0.15);
+      margin-bottom: 25px;
+    }
+     .chart-container {
+      position: relative;
+    }
+    
+    .chart-container canvas {
+      width: 100% !important;
+      height: 300px !important; /* Altura fixa */
+    }
+
+    .filter-active {
+      background-color: var(--primary) !important;
+      color: white !important;
+    }
+    
+    .filter-btn-group .btn {
+      transition: all 0.3s ease;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+    
+    .stat-card {
+      border-radius: 10px;
+      border: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      transition: transform 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .stat-card .card-body {
+      padding: 20px;
+    }
+    
+    .malicious { 
+      background-color: rgba(247, 37, 133, 0.1) !important; 
+      color: var(--danger) !important;
+      font-weight: bold;
+    }
+    
+    .normal { 
+      background-color: rgba(76, 201, 240, 0.1) !important;
+      color: var(--success) !important;
+    }
+    
+    .chart-container {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      margin-bottom: 25px;
+      height: 100%;
+    }
+    
+    .table-container {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+    
+    .status-badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      display: inline-block;
+    }
+    
+    .last-updated {
+      font-size: 0.85rem;
+      opacity: 0.7;
+      text-align: right;
+      margin-top: 10px;
+    }
+    
+    .packet-row {
+      transition: background-color 0.2s;
+    }
+    
+    .packet-row:hover {
+      background-color: #f8f9fa !important;
+    }
+    
+    .protocol-badge {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      background-color: #e9ecef;
+      color: #495057;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+<body>
+<div class="container-fluid">
+  <div class="dashboard-header">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h1><i class="bi bi-graph-up"></i> CyberTraffic - Dashboard de Monitoramento</h1>
+        <p class="mb-0">Monitoramento em tempo real do tráfego de rede</p>
+      </div>
+      <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <div class="d-inline-block bg-white text-dark p-2 rounded">
+          <i class="bi bi-clock-history me-1"></i>
+          <span id="last-updated">Atualizando...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de Filtros -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body py-3">
+          <div class="row g-3 align-items-center">
+            <div class="col-md-4">
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" id="search-filter" class="form-control" placeholder="Filtrar por IP, protocolo ou motivo..." value="{{ current_search or '' }}">
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="filter-btn-group btn-group w-100">
+                <button type="button" class="btn btn-outline-primary filter-status {{ 'filter-active' if current_status == 'all' else '' }}" data-status="all">
+                  Todos
+                </button>
+                <button type="button" class="btn btn-outline-success filter-status {{ 'filter-active' if current_status == 'normal' else '' }}" data-status="normal">
+                  <i class="bi bi-shield-check"></i> Normais
+                </button>
+                <button type="button" class="btn btn-outline-danger filter-status {{ 'filter-active' if current_status == 'malicious' else '' }}" data-status="malicious">
+                  <i class="bi bi-shield-slash"></i> Maliciosos
+                </button>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <div class="btn-group w-100" id="time-range-group">
+                <button type="button" class="btn btn-outline-secondary time-range active" data-range="24h">24 Horas</button>
+                <button type="button" class="btn btn-outline-secondary time-range" data-range="7d">7 Dias</button>
+                <button type="button" class="btn btn-outline-secondary time-range" data-range="30d">30 Dias</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="stat-card bg-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h5 class="text-muted">Total de Pacotes</h5>
+              <p class="fs-2 fw-bold mb-0" id="total">{{ total }}</p>
+            </div>
+            <div class="icon-circle bg-primary text-white">
+              <i class="bi bi-stack fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="stat-card bg-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h5 class="text-muted">Pacotes Maliciosos</h5>
+              <p class="fs-2 fw-bold mb-0" id="malicious">{{ malicious }}</p>
+            </div>
+            <div class="icon-circle bg-danger text-white">
+              <i class="bi bi-shield-slash fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="stat-card bg-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h5 class="text-muted">% Maliciosos</h5>
+              <p class="fs-2 fw-bold mb-0" id="percent">{{ percent | round(2) }}%</p>
+            </div>
+            <div class="icon-circle bg-warning text-white">
+              <i class="bi bi-percent fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="stat-card bg-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h5 class="text-muted">Pacotes Filtrados</h5>
+              <p class="fs-2 fw-bold mb-0" id="filtered-count">{{ packets | length }}</p>
+            </div>
+            <div class="icon-circle bg-info text-white">
+              <i class="bi bi-funnel fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-6 mb-4">
+      <div class="chart-container">
+        <h5><i class="bi bi-pie-chart me-2"></i>Distribuição de Pacotes</h5>
+        <canvas id="pieChart"></canvas>
+      </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+      <div class="chart-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5><i class="bi bi-bar-chart-line me-2"></i>Tráfego por Período</h5>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline-secondary time-range active" data-range="24h">24h</button>
+            <button class="btn btn-sm btn-outline-secondary time-range" data-range="7d">7d</button>
+            <button class="btn btn-sm btn-outline-secondary time-range" data-range="30d">30d</button>
+          </div>
+        </div>
+        <canvas id="lineChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="table-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5><i class="bi bi-table me-2"></i>Pacotes Detectados</h5>
+          <div class="d-flex">
+            <div class="input-group input-group-sm me-2" style="width: 180px;">
+              <span class="input-group-text"><i class="bi bi-list-ol"></i></span>
+              <select id="limit-select" class="form-select">
+                <option value="10">10 itens</option>
+                <option value="50" selected>50 itens</option>
+                <option value="100">100 itens</option>
+                <option value="500">500 itens</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Horário</th>
+                <th>Origem</th>
+                <th>Destino</th>
+                <th>Protocolo</th>
+                <th>Tamanho</th>
+                <th>Status</th>
+                <th>Motivo</th>
+              </tr>
+            </thead>
+            <tbody id="packets-table-body">
+              {% for p in packets %}
+              <tr class="packet-row">
+                <td>{{ p[0] }}</td>
+                <td>
+                  <span class="d-block">{{ p[1] }}</span>
+                  <small class="text-muted">Porta: {{ p[2] }}</small>
+                </td>
+                <td>
+                  <span class="d-block">{{ p[3] }}</span>
+                  <small class="text-muted">Porta: {{ p[4] }}</small>
+                </td>
+                <td><span class="protocol-badge">{{ p[5] }}</span></td>
+                <td>{{ p[6] }} bytes</td>
+                <td>
+                  <span class="status-badge {{ 'malicious' if p[7] else 'normal' }}">
+                    <i class="bi {{ 'bi-shield-slash' if p[7] else 'bi-shield-check' }} me-1"></i>
+                    {{ 'Malicioso' if p[7] else 'Normal' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="d-block">{{ p[8] }}</span>
+                  <small class="text-muted">CVE-2023-12345</small>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center mt-3">
+          <div>Mostrando <span id="showing-count">{{ packets|length }}</span> pacotes</div>
+          <div id="loading-indicator" class="d-none">
+            <div class="loading-spinner"></div>
+            <span>Carregando...</span>
+          </div>
+          <nav>
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item disabled"><a class="page-link" href="#">Anterior</a></li>
+              <li class="page-item active"><a class="page-link" href="#">1</a></li>
+              <li class="page-item"><a class="page-link" href="#">2</a></li>
+              <li class="page-item"><a class="page-link" href="#">3</a></li>
+              <li class="page-item"><a class="page-link" href="#">Próximo</a></li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="last-updated">
+    <i class="bi bi-clock"></i> Última atualização: <span id="update-time">--:--:--</span>
+  </div>
+</div>
+
+<script>
+// Variáveis globais
+let pieChart, lineChart;
+let currentFilters = {
+  status: '{{ current_status or "all" }}',
+  search: '{{ current_search or "" }}',
+  time_range: '24h',
+  limit: 50
+};
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', function() {
+  // Inicializar gráficos
+  setupCharts();
+  
+  // Configurar eventos dos filtros
+  setupFilterEvents();
+  
+  // Atualizar relógio
+  setInterval(updateClock, 1000);
+});
+
+// Configurar eventos dos filtros
+function setupFilterEvents() {
+  // Filtro de status
+  document.querySelectorAll('.filter-status').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.filter-status').forEach(b => {
+        b.classList.remove('filter-active');
+      });
+      this.classList.add('filter-active');
+      
+      currentFilters.status = this.dataset.status;
+      applyFilters();
+    });
+  });
+  
+  // Filtro de busca
+  const searchInput = document.getElementById('search-filter');
+  let searchTimeout;
+  searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      currentFilters.search = this.value;
+      applyFilters();
+    }, 500);
+  });
+  
+  // Filtro de intervalo de tempo
+  document.querySelectorAll('.time-range').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.time-range').forEach(b => {
+        b.classList.remove('active');
+      });
+      this.classList.add('active');
+      
+      currentFilters.time_range = this.dataset.range;
+      updateDashboard();
+    });
+  });
+  
+  // Filtro de limite de itens
+  document.getElementById('limit-select').addEventListener('change', function() {
+    currentFilters.limit = parseInt(this.value);
+    fetchPackets();
+  });
+}
+
+// Aplicar todos os filtros
+function applyFilters() {
+  // Atualizar dashboard (cards e gráficos)
+  updateDashboard();
+  
+  // Atualizar tabela de pacotes
+  fetchPackets();
+}
+
+// Atualizar relógio
+function updateClock() {
+  const now = new Date();
+  document.getElementById('last-updated').textContent = 
+    now.toLocaleTimeString('pt-BR');
+}
+
+// Buscar pacotes com filtros
+function fetchPackets() {
+  const loadingIndicator = document.getElementById('loading-indicator');
+  loadingIndicator.classList.remove('d-none');
+  
+  // Construir query string
+  const params = new URLSearchParams();
+  if (currentFilters.status && currentFilters.status !== 'all') {
+    params.append('status', currentFilters.status);
+  }
+  if (currentFilters.search) {
+    params.append('search', currentFilters.search);
+  }
+  params.append('limit', currentFilters.limit);
+  
+  fetch(`/api/packets?${params.toString()}`)
+    .then(res => res.json())
+    .then(packets => {
+      renderPacketsTable(packets);
+      document.getElementById('showing-count').textContent = packets.length;
+      document.getElementById('filtered-count').textContent = packets.length;
+      loadingIndicator.classList.add('d-none');
+    })
+    .catch(error => {
+      console.error('Erro ao buscar pacotes:', error);
+      loadingIndicator.classList.add('d-none');
+    });
+}
+
+// Renderizar tabela de pacotes
+function renderPacketsTable(packets) {
+  const tbody = document.getElementById('packets-table-body');
+  tbody.innerHTML = '';
+  
+  packets.forEach(p => {
+    const row = document.createElement('tr');
+    row.className = 'packet-row';
+    
+    // Formatar status
+    const statusClass = p.is_malicious ? 'malicious' : 'normal';
+    const statusIcon = p.is_malicious ? 'bi-shield-slash' : 'bi-shield-check';
+    const statusText = p.is_malicious ? 'Malicioso' : 'Normal';
+    
+    row.innerHTML = `
+      <td>${p.timestamp}</td>
+      <td>
+        <span class="d-block">${p.src_ip}</span>
+        <small class="text-muted">Porta: ${p.src_port}</small>
+      </td>
+      <td>
+        <span class="d-block">${p.dst_ip}</span>
+        <small class="text-muted">Porta: ${p.dst_port}</small>
+      </td>
+      <td><span class="protocol-badge">${p.protocol}</span></td>
+      <td>${p.packet_size} bytes</td>
+      <td>
+        <span class="status-badge ${statusClass}">
+          <i class="bi ${statusIcon} me-1"></i>
+          ${statusText}
+        </span>
+      </td>
+      <td>
+        <span class="d-block">${p.reason}</span>
+        <small class="text-muted">CVE-2023-12345</small>
+      </td>
+    `;
+    
+    tbody.appendChild(row);
+  });
+}
+
+// Atualizar dashboard (cards e gráficos)
+function updateDashboard() {
+  const loadingIndicator = document.getElementById('loading-indicator');
+  loadingIndicator.classList.remove('d-none');
+  
+  // Construir query string
+  const params = new URLSearchParams();
+  if (currentFilters.status && currentFilters.status !== 'all') {
+    params.append('status', currentFilters.status);
+  }
+  if (currentFilters.search) {
+    params.append('search', currentFilters.search);
+  }
+  params.append('time_range', currentFilters.time_range);
+  
+  fetch(`/api/stats?${params.toString()}`)
+    .then(res => res.json())
+    .then(data => {
+      // Atualizar cards
+      document.getElementById("total").textContent = data.total;
+      document.getElementById("malicious").textContent = data.malicious;
+      document.getElementById("percent").textContent = data.percent.toFixed(2) + "%";
+      
+      // Atualizar gráfico de pizza
+      if (pieChart) {
+        pieChart.data.datasets[0].data = [data.malicious, data.total - data.malicious];
+        pieChart.update();
+      }
+
+      // Atualizar gráfico de linha
+      if (lineChart) {
+        const labels = data.traffic_over_time.map(d => d[0]);
+        const counts = data.traffic_over_time.map(d => d[1]);
+        lineChart.data.labels = labels;
+        lineChart.data.datasets[0].data = counts;
+        lineChart.update();
+      }
+      
+      // Atualizar timestamp
+      const now = new Date();
+      document.getElementById('update-time').textContent = 
+        `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        
+      loadingIndicator.classList.add('d-none');
+    })
+    .catch(error => {
+      console.error('Erro ao atualizar dashboard:', error);
+      document.getElementById('last-updated').innerHTML = 
+        '<span class="text-danger">Erro na atualização</span>';
+      loadingIndicator.classList.add('d-none');
+    });
+}
+
+function setupCharts() {
+  // Gráfico de pizza
+  const pieCtx = document.getElementById('pieChart').getContext('2d');
+  pieChart = new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Maliciosos', 'Normais'],
+      datasets: [{
+        data: [{{ malicious }}, {{ total - malicious }}],
+        backgroundColor: ['#f72585', '#4cc9f0'],
+        borderWidth: 0,
+        hoverOffset: 15
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            boxWidth: 15,
+            padding: 20
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.raw || 0;
+              const total = context.chart.getDatasetMeta(0).total;
+              const percentage = Math.round((value / total) * 100);
+              return `${label}: ${value} (${percentage}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Gráfico de linha
+  const lineCtx = document.getElementById('lineChart').getContext('2d');
+  lineChart = new Chart(lineCtx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{
+        label: 'Pacotes por Minuto',
+        data: [],
+        fill: true,
+        backgroundColor: 'rgba(67, 97, 238, 0.1)',
+        borderColor: '#4361ee',
+        borderWidth: 3,
+        pointRadius: 4,
+        pointBackgroundColor: '#fff',
+        pointBorderWidth: 2,
+        tension: 0.2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.05)'
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      }
+    }
+  });
+
+  // Inicia atualização periódica
+  updateDashboard();
+  updateInterval = setInterval(updateDashboard, 10000);
+}
+
+// Inicialização quando o DOM estiver pronto
+document.addEventListener('DOMContentLoaded', function() {
+  setupCharts();
+  
+  // Atualiza a cada 10 segundos
+  updateInterval = setInterval(updateDashboard, 10000);
+  
+  // Atualiza o relógio a cada segundo
+  setInterval(() => {
+    const now = new Date();
+    document.getElementById('last-updated').textContent = 
+      now.toLocaleTimeString('pt-BR');
+  }, 1000);
+});
+
+// Limpa o intervalo quando a página é fechada
+window.addEventListener('beforeunload', function() {
+  clearInterval(updateInterval);
+});
+</script>
+</body>
+</html>
