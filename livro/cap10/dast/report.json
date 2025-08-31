@@ -1,0 +1,193 @@
+{
+  "target": "http://www.iplatao.com",
+  "scan_date": "2025-08-31 14:18:25",
+  "urls_scanned": 23,
+  "vulnerabilities_found": 20,
+  "vulnerabilities": [
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/2017/05/httpsdocs.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/p/blog-page_92.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/2017/08/curso-redes-industriais.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/2017/08/curso-ciberseguranca-hacking-e-contra.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/2017/08/rede-sem-fio-com-ibmmqtt-e-esp8266-32h.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/p/blog-page_8.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/2016/12/cursos-informatica.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/2017/08/curso-raspberry-pi-hands-on-8-projetos.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/p/blog-page.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/2016/12/automacao-e-robotica.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/p/blog-page_10.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/p/blog-page_2.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/2016/12/cursos-de-gestao.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/p/processos-de-formacao.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/2016/11/procurando-uma-nova-profissao.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/2017/08/curso-descomplicando-arduino-avr-40h.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/2017/01/e-com-prazer-que-anunciamos-inauguracao.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    },
+    {
+      "type": "Missing Security Header",
+      "url": "http://www.iplatao.com/2017/09/formacao-de-especialista-em-sistemas.html",
+      "parameter": "X-Frame-Options",
+      "payload": null,
+      "severity": "LOW",
+      "description": "Header de seguran\u00e7a ausente: X-Frame-Options.",
+      "mitigation": "Adicione o header X-Frame-Options \u00e0s respostas do servidor."
+    }
+  ],
+  "summary": {
+    "high": 0,
+    "medium": 0,
+    "low": 20
+  }
+}
