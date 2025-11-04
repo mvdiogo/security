@@ -1,45 +1,57 @@
-Arquivos Criados:
-1. vulnerable_app.php
-Aplicação PHP com 7 vulnerabilidades reais implementadas:
+# Vulnerable PHP App with Exploits
 
-✅ CVE-2025-6491 - SOAP XML Namespace Overflow
-✅ CVE-2025-1861 - HTTP Redirect URL Truncation
-✅ CVE-2025-1736 - HTTP Header Injection
-✅ CVE-2025-1220 - Null Byte in Hostname
-✅ CVE-2022-31631 - PDO SQLite Quote Overflow
-✅ CVE-2025-1734 - Invalid HTTP Headers
-✅ CVE-2025-1217 - Folded HTTP Headers
+This repository contains a deliberately vulnerable PHP application demonstrating real-world vulnerabilities (based on fictional CVEs for educational purposes). It includes a bash script to test and exploit each vulnerability using `curl`.
 
-2. exploit_tests.sh
-Script bash com testes curl para explorar cada vulnerabilidade
-🚀 Como Usar:
+**Purpose:** Educational only. Use in isolated test environments. Do not deploy in production or use against unauthorized systems.
 
-# 1. Salvar os arquivos
-# vulnerable_app.php e exploit_tests.sh
+## Files Created
 
-# 2. Iniciar o servidor PHP
-php -S localhost:8000 vulnerable_app.php
+1. **vulnerable_app.php**  
+   A PHP application with 7 implemented vulnerabilities:  
+   - CVE-2025-6491 - SOAP XML Namespace Overflow  
+   - CVE-2025-1861 - HTTP Redirect URL Truncation  
+   - CVE-2025-1736 - HTTP Header Injection  
+   - CVE-2025-1220 - Null Byte in Hostname  
+   - CVE-2022-31631 - PDO SQLite Quote Overflow  
+   - CVE-2025-1734 - Invalid HTTP Headers  
+   - CVE-2025-1217 - Folded HTTP Headers  
 
-# 3. Em outro terminal, executar os testes
-chmod +x exploit_tests.sh
-./exploit_tests.sh
+2. **exploit_tests.sh**  
+   A bash script with `curl` tests to exploit each vulnerability.
 
+## How to Use
 
-O que cada teste faz:
-CVE-2025-6491: Envia XML com namespace prefix gigante (10KB) para causar crash
-CVE-2025-1861: Envia URL de 2000+ bytes que será truncada em 1024 bytes
-CVE-2025-1736: Injeta headers maliciosos via caracteres CRLF (\r\n)
-CVE-2025-1220: Usa null byte (\x00) para fazer bypass de validação de hostname
-CVE-2022-31631: Envia string de 1MB para causar overflow no PDO::quote()
-CVE-2025-1734: Envia header sem dois-pontos que é aceito como válido
-CVE-2025-1217: Envia header "dobrado" (folded) que é parseado incorretamente
-📊 Cada teste retorna:
+1. Save the files: `vulnerable_app.php` and `exploit_tests.sh`.
 
-✅ Status HTTP
-🔍 Detecção da vulnerabilidade
-📍 Local exato da falha (linha do código)
-💥 Causa raiz do problema
-⚠️ Impacto na segurança
+2. Start the PHP server:  
+   ```
+   php -S localhost:8000 vulnerable_app.php
+   ```
 
-⚠️ IMPORTANTE:
-Este código é APENAS EDUCACIONAL. Use exclusivamente em ambientes de teste isolados. Nunca use em produção ou contra sistemas sem autorização expressa!
+3. In another terminal, run the tests:  
+   ```
+   chmod +x exploit_tests.sh
+   ./exploit_tests.sh
+   ```
+
+## What Each Test Does
+
+- **CVE-2025-6491:** Sends XML with a giant namespace prefix (10KB) to cause a crash.  
+- **CVE-2025-1861:** Sends a URL of 2000+ bytes that gets truncated to 1024 bytes.  
+- **CVE-2025-1736:** Injects malicious headers via CRLF characters (`\r\n`).  
+- **CVE-2025-1220:** Uses a null byte (`\x00`) to bypass hostname validation.  
+- **CVE-2022-31631:** Sends a 1MB string to cause overflow in `PDO::quote()`.  
+- **CVE-2025-1734:** Sends a header without a colon that is accepted as valid.  
+- **CVE-2025-1217:** Sends a "folded" header that is parsed incorrectly.
+
+## What Each Test Returns
+
+- HTTP Status  
+- Vulnerability Detection  
+- Exact Failure Location (code line)  
+- Root Cause of the Issue  
+- Security Impact  
+
+## IMPORTANT
+
+This code is **FOR EDUCATIONAL PURPOSES ONLY**. Use exclusively in isolated test environments. Never use in production or against systems without explicit authorization!
