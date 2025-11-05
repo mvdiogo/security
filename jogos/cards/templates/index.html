@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Cyber Security TCG 3D</title>
+<style>
+:root{
+  --primary:#4ade80;
+  --secondary:#60a5fa;
+  --accent:#fbbf24;
+  --danger:#ef4444;
+  --bg:#0f0f23;
+  --glass: rgba(255,255,255,.06);
+  --border: rgba(255,255,255,.12);
+  --shadow-3d: 4px 4px 12px rgba(0,0,0,.5), -4px -4px 12px rgba(255,255,255,.03);
+  --shadow-inset: inset 2px 2px 6px rgba(0,0,0,.4), inset -2px -2px 6px rgba(255,255,255,.05);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:#fff;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  perspective:1000px;
+  overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+#parallax-bg{
+  position:fixed;inset:0;pointer-events:none;z-index:-1
+}
+.layer{
+  position:absolute;width:110%;height:110%;
+  background:radial-gradient(circle at 30% 40%,var(--primary) 0%,transparent 70%),
+            radial-gradient(circle at 70% 60%,var(--secondary) 0%,transparent 70%),
+            radial-gradient(circle at 50% 30%,var(--accent) 0%,transparent 70%);
+  filter:blur(80px) opacity(.25);
+  will-change:transform;
+}
+.welcome-container{
+  width:min(90vw,380px);
+  padding:30px 25px 35px;
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:32px;
+  box-shadow:var(--shadow-3d);
+  backdrop-filter:blur(16px) saturate(140%);
+  transform-style:preserve-3d;
+  animation:floatCard 6s ease-in-out infinite;
+  position:relative;
+}
+@keyframes floatCard{
+  0%,100%{transform:translateY(0) rotateX(0) rotateY(0)}
+  50%{transform:translateY(-8px) rotateX(1deg) rotateY(1deg)}
+}
+h1{
+  font-size:clamp(1.4rem,4.5vw,1.8rem);
+  text-align:center;
+  margin-bottom:4px;
+  background:linear-gradient(135deg,var(--primary),var(--secondary),var(--accent));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  transform:translateZ(20px);
+}
+.subtitle{
+  font-size:clamp(.9rem,2.8vw,1.1rem);
+  color:#aaa;
+  text-align:center;
+  margin-bottom:22px;
+  transform:translateZ(10px);
+}
+.form-group{margin-bottom:22px}
+label{font-size:.95rem;margin-bottom:6px;display:block;font-weight:600}
+input[type="text"]{
+  width:100%;padding:12px 16px;font-size:1rem;border:none;border-radius:16px;
+  background:var(--glass);box-shadow:var(--shadow-inset);color:#fff;
+  transition:box-shadow .3s;
+}
+input[type="text"]:focus{
+  outline:none;box-shadow:var(--shadow-inset),0 0 0 2px var(--primary);
+}
+.difficulty-selector{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px;
+}
+.difficulty-option input{display:none}
+.difficulty-label{
+  padding:10px 4px;text-align:center;border-radius:16px;background:var(--glass);
+  box-shadow:var(--shadow-3d);cursor:pointer;font-weight:600;font-size:.8rem;
+  transition:transform .2s,box-shadow .2s;
+}
+.difficulty-label:active{transform:scale(.95);box-shadow:var(--shadow-inset)}
+.difficulty-option input:checked + .difficulty-label{background:rgba(255,255,255,.08);box-shadow:var(--shadow-inset)}
+.start-button{
+  width:100%;padding:14px;font-size:1rem;font-weight:700;border:none;border-radius:20px;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;
+  box-shadow:var(--shadow-3d);cursor:pointer;margin-top:24px;text-transform:uppercase;letter-spacing:.5px;
+  transition:transform .2s,box-shadow .2s;
+}
+.start-button:active{transform:scale(.95);box-shadow:var(--shadow-inset)}
+#infoToggle{
+  background:none;border:none;color:var(--accent);font-size:.9rem;margin-top:16px;cursor:pointer;
+}
+.game-info{
+  max-height:0;overflow:hidden;transition:max-height .4s ease;margin-top:0;
+}
+.game-info.open{max-height:400px;margin-top:16px}
+.game-info ul{list-style:none;font-size:.8rem;line-height:1.5}
+.game-info li{margin-bottom:4px}
+@media(max-width:480px){
+  .difficulty-selector{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="parallax-bg">
+  <div class="layer" data-speed="0.2"></div>
+  <div class="layer" data-speed="0.5"></div>
+  <div class="layer" data-speed="0.8"></div>
+</div>
+
+<div class="welcome-container">
+  <h1>Cyber Security TCG</h1>
+  <p class="subtitle">Triad Defense</p>
+
+  <form id="gameForm" action="/game" method="GET">
+    <div class="form-group">
+      <label>👤 Seu Nome</label>
+      <input type="text" id="playerName" placeholder="Ex: Neo" required>
+    </div>
+
+    <div class="form-group">
+      <label>⚡ Nível de Dificuldade</label>
+      <div class="difficulty-selector">
+        <div class="difficulty-option">
+          <input type="radio" name="difficulty" value="facil" id="easy">
+          <label for="easy" class="difficulty-label difficulty-easy">🟢 Fácil</label>
+        </div>
+        <div class="difficulty-option">
+          <input type="radio" name="difficulty" value="normal" id="normal" checked>
+          <label for="normal" class="difficulty-label difficulty-normal">🟡 Normal</label>
+        </div>
+        <div class="difficulty-option">
+          <input type="radio" name="difficulty" value="dificil" id="hard">
+          <label for="hard" class="difficulty-label difficulty-hard">🔴 Difícil</label>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="start-button">🚀 Iniciar Jogo</button>
+  </form>
+
+  <button id="infoToggle">Como jogar ▼</button>
+  <div class="game-info" id="gameInfo">
+    <ul>
+      <li>🎯 Reduza a vida do oponente ou complete a Tríade CIA</li>
+      <li>🛡️ Use cartas de defesa para proteger seu sistema</li>
+      <li>⚔️ Lance ameaças contra o adversário</li>
+      <li>🎩 Hackers dão habilidades especiais</li>
+      <li>🔒 Colete Confidencialidade, Integridade e Disponibilidade</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+/* Parallax leve no fundo */
+window.addEventListener('deviceorientation', e=>{
+  const layers = document.querySelectorAll('.layer');
+  const x = e.beta / 90;
+  const y = e.gamma / 90;
+  layers.forEach(l=>{
+    const speed = l.dataset.speed;
+    l.style.transform = `translate(${y*speed*20}px, ${x*speed*20}px)`;
+  });
+});
+
+/* Toggle instruções */
+const infoToggle = document.getElementById('infoToggle');
+const gameInfo = document.getElementById('gameInfo');
+infoToggle.addEventListener('click', ()=>{
+  gameInfo.classList.toggle('open');
+  infoToggle.textContent = gameInfo.classList.contains('open') ? 'Como jogar ▲' : 'Como jogar ▼';
+});
+
+/* Submissão */
+document.getElementById('gameForm').addEventListener('submit', e=>{
+  const name = document.getElementById('playerName').value.trim();
+  if(!name){
+    e.preventDefault();
+    document.getElementById('playerName').animate([
+      {transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}
+    ],{duration:300,iterations:2});
+    document.getElementById('playerName').focus();
+    return;
+  }
+  /* Aqui você pode redirecionar ou iniciar o jogo */
+  /* Exemplo: */
+  // e.preventDefault();
+  // alert(`Boa sorte, ${name}!`);
+});
+</script>
+</body>
+</html>

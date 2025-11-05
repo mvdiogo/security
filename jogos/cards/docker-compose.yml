@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jogo-seguranca
+    ports:
+      - "8088:8088"
+    env_file:
+      - .env
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          memory: 300M
+          cpus: "0.5"
+        reservations:
+          memory: 150M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 120s
+    volumes:
+      - ./cards_database.csv:/app/cards_database.csv:ro
+      - ./logs:/app/logs

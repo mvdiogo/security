@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>do.not.br | Cibersegurança de Ponta</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --dark-blue: #0d1b2a;
+            --navy: #1b263b;
+            --slate: #415a77;
+            --light-blue: #778da9;
+            --platinum: #e0e1dd;
+            --accent: #ff6b6b;
+            --secondary-accent: #4ecdc4;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--dark-blue) 0%, var(--navy) 50%, var(--slate) 100%);
+            color: var(--platinum);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* Header */
+        header {
+            background: rgba(13, 27, 42, 0.9);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--platinum);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo span {
+            color: var(--secondary-accent);
+            margin-left: 4px;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+        
+        nav ul li a {
+            color: var(--platinum);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+        
+        nav ul li a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background-color: var(--secondary-accent);
+            transition: width 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: var(--secondary-accent);
+        }
+        
+        nav ul li a:hover:after {
+            width: 100%;
+        }
+        
+        .cta-button {
+            background: linear-gradient(135deg, var(--accent) 0%, #ff8e8e 100%);
+            color: white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+            display: inline-block;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: radial-gradient(circle at top right, rgba(27, 38, 59, 0.8) 0%, rgba(13, 27, 42, 0.9) 70%), 
+                        url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover no-repeat;
+            color: var(--platinum);
+            padding: 7rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%234ecdc4' fill-opacity='0.1' d='M0,128L48,117.3C96,107,192,85,288,112C384,139,480,213,576,218.7C672,224,768,160,864,138.7C960,117,1056,139,1152,149.3C1248,160,1344,160,1392,160L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") bottom/cover no-repeat;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 3.2rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+        }
+        
+        /* Services */
+        .services {
+            padding: 6rem 0;
+            background: radial-gradient(circle at bottom left, var(--navy) 0%, var(--dark-blue) 70%);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2.8rem;
+            color: var(--platinum);
+            margin-bottom: 1.2rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title h2:after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent), var(--secondary-accent));
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+        
+        .section-title p {
+            color: var(--light-blue);
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+        }
+        
+        .service-card {
+            background: linear-gradient(145deg, rgba(27, 38, 59, 0.8), rgba(27, 38, 59, 0.4));
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s;
+            padding: 2.5rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(119, 141, 169, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border-color: rgba(78, 205, 196, 0.2);
+        }
+        
+        .service-icon {
+            font-size: 2.5rem;
+            color: var(--secondary-accent);
+            margin-bottom: 1.5rem;
+        }
+        
+        .service-content h3 {
+            color: var(--platinum);
+            margin-bottom: 1.2rem;
+            font-size: 1.5rem;
+        }
+        
+        .service-content p {
+            color: var(--light-blue);
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+        
+        /* Special Services */
+        .special-services {
+            padding: 6rem 0;
+            background: radial-gradient(circle at top right, var(--slate) 0%, var(--navy) 70%);
+        }
+        
+        .special-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+            margin-top: 4rem;
+        }
+        
+        .special-card {
+            background: linear-gradient(145deg, rgba(27, 38, 59, 0.9), rgba(27, 38, 59, 0.6));
+            padding: 3rem 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(119, 141, 169, 0.1);
+            transition: all 0.4s;
+        }
+        
+        .special-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .special-icon {
+            font-size: 3.5rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+        
+        .special-card h3 {
+            color: var(--platinum);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        
+        .special-card p {
+            color: var(--light-blue);
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+        }
+        
+        /* Stats */
+        .stats {
+            padding: 5rem 0;
+            background: linear-gradient(135deg, var(--navy) 0%, var(--dark-blue) 100%);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2.5rem;
+            text-align: center;
+        }
+        
+        .stat-item {
+            background: rgba(27, 38, 59, 0.6);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(119, 141, 169, 0.1);
+        }
+        
+        .stat-item h3 {
+            font-size: 3rem;
+            color: var(--secondary-accent);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+        
+        .stat-item p {
+            color: var(--light-blue);
+            font-size: 1.1rem;
+        }
+        
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--slate) 0%, var(--navy) 50%, var(--dark-blue) 100%);
+            color: var(--platinum);
+            padding: 6rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-section:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ff6b6b' fill-opacity='0.1' d='M0,160L48,138.7C96,117,192,75,288,64C384,53,480,75,576,106.7C672,139,768,181,864,186.7C960,192,1056,160,1152,138.7C1248,117,1344,107,1392,101.3L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'%3E%3C/path%3E%3C/svg%3E") top/cover no-repeat;
+        }
+        
+        .cta-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .cta-section h2 {
+            font-size: 2.8rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark-blue);
+            color: var(--platinum);
+            padding: 5rem 0 2rem;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+        
+        .footer-column h3 {
+            margin-bottom: 1.8rem;
+            font-size: 1.4rem;
+            color: var(--secondary-accent);
+            position: relative;
+            display: inline-block;
+        }
+        
+        .footer-column h3:after {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 3px;
+            background: var(--accent);
+            bottom: -10px;
+            left: 0;
+            border-radius: 2px;
+        }
+        
+        .footer-column p {
+            color: var(--light-blue);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 1rem;
+        }
+        
+        .footer-column ul li a {
+            color: var(--light-blue);
+            text-decoration: none;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .footer-column ul li a i {
+            margin-right: 10px;
+            color: var(--secondary-accent);
+        }
+        
+        .footer-column ul li a:hover {
+            color: var(--secondary-accent);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 1.5rem;
+        }
+        
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: var(--platinum);
+            transition: all 0.3s;
+        }
+        
+        .social-links a:hover {
+            background: var(--accent);
+            transform: translateY(-3px);
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--light-blue);
+        }
+        
+        /* Form */
+        .footer-form input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--platinum);
+        }
+        
+        .footer-form input::placeholder {
+            color: var(--light-blue);
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+            
+            .special-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            nav ul {
+                margin: 1.5rem 0;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            nav ul li {
+                margin: 0 0.8rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.3rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .section-title h2 {
+                font-size: 2.3rem;
+            }
+            
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero {
+                padding: 5rem 0;
+            }
+            
+            .special-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-content">
+            <a href="https://do.not.br" class="logo">
+                <i class="fas fa-shield-alt"></i>
+                do.not.<span>br</span>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="#services">Serviços</a></li>
+                    <li><a href="#about">Sobre</a></li>
+                    <li><a href="#contact">Contato</a></li>
+                    <li><a href="#blog">Blog</a></li>
+                </ul>
+            </nav>
+            <a href="#contact" class="cta-button">Solicitar Orçamento</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <h1>Proteja seu negócio com cibersegurança de ponta</h1>
+            <p>Firewall de última geração sem investimento em equipamento. Monitoramento 24/7 e suporte especializado para sua empresa.</p>
+            <a href="#services" class="cta-button">Conhecer Soluções</a>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <div class="section-title">
+                <h2>Nossos Serviços</h2>
+                <p>Soluções completas em cibersegurança para empresas de todos os portes</p>
+            </div>
+            
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3>Firewall em Comodato</h3>
+                        <p>Proteja sua empresa com um firewall de última geração sem gastar com equipamento. Instalamos e gerenciamos para você.</p>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3>Consultoria em Segurança</h3>
+                        <p>Análise de vulnerabilidades, pentest, gestão de riscos e planos personalizados para sua infraestrutura.</p>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3>Sites Personalizados Seguros</h3>
+                        <p>Desenvolvimento de sites e aplicações web com foco total em segurança e performance.</p>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3>Configuração de Infraestrutura</h3>
+                        <p>Load balance, Active Directory, cloud services e muito mais para sua empresa.</p>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-desktop"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3>Monitoramento 24/7</h3>
+                        <p>Sua rede protegida o tempo todo. Identificamos e agimos antes que o problema aconteça.</p>
+                    </div>
+                </div>
+                
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-filter"></i>
+                    </div>
+                    <div class="service-content">
+                        <h3>Webfilter e Controle de Acesso</h3>
+                        <p>Bloqueio de sites por categoria, horário e perfil de usuário, com total gestão da navegação.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Special Services Section -->
+    <section class="special-services">
+        <div class="container">
+            <div class="section-title">
+                <h2>Serviços Exclusivos</h2>
+                <p>Ferramentas inovadoras para educação e proteção digital</p>
+            </div>
+            
+            <div class="special-grid">
+                <div class="special-card">
+                    <div class="special-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <h3>Jogo de Cibersegurança</h3>
+                    <p>Aprenda sobre segurança digital de forma divertida e interativa com nosso jogo educativo. Teste seus conhecimentos e descubra como se proteger de ameaças cibernéticas.</p>
+                    <a href="https://game.do.not.br/" class="cta-button">Jogar Agora</a>
+                </div>
+                
+                <div class="special-card">
+                    <div class="special-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Análise de Site</h3>
+                    <p>Verifique gratuitamente se seu site corre riscos de segurança com nossa ferramenta especializada. Obtenha um relatório detalhado com possíveis vulnerabilidades.</p>
+                    <a href="https://scan.do.not.br/" class="cta-button">Analisar Site</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <!--section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>+350</h3>
+                    <p>Empresas Atendidas</p>
+                </div>
+                
+                <div class="stat-item">
+                    <h3>24/7</h3>
+                    <p>Monitoramento Contínuo</p>
+                </div>
+                
+                <div class="stat-item">
+                    <h3>100%</h3>
+                    <p>Reposição Garantida</p>
+                </div>
+                
+                <div class="stat-item">
+                    <h3>2010</h3>
+                    <p>Atuando no Mercado</p>
+                </div>
+            </div>
+        </div>
+    </section-->
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container cta-content">
+            <h2>Pronto para blindar sua empresa?</h2>
+            <p>Não espere sua rede falhar para agir. Nossa segurança entra em ação agora, sem investimento em equipamento.</p>
+            <a href="mailto:contato@do.not.br" class="cta-button">Falar com Especialista</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h3>do.not.br</h3>
+                    <p>Sua empresa protegida com soluções completas em cibersegurança. Atuando no mercado desde 2010 com expertise e inovação.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contato</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-envelope"></i> contato@do.not.br</a></li>
+                        <!---li><a href="#"><i class="fas fa-phone"></i> (11) 99999-9999</a></li--->
+                        <!---li><a href="#"><i class="fas fa-headset"></i> Suporte 24/7</a></li--->
+                        <li><a href="#"><i class="fas fa-map-marker-alt"></i> Distrito Federal, Brasil</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Links Rápidos</h3>
+                    <ul>
+                        <li><a href="#services"><i class="fas fa-chevron-right"></i> Serviços</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Sobre Nós</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Blog</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Cases de Sucesso</a></li>
+                    </ul>
+                </div>
+                
+                <!---div class="footer-column">
+                    <h3>Inscreva-se</h3>
+                    <p>Receba nossas dicas de segurança e novidades.</p>
+                    <form class="footer-form">
+                        <input type="email" placeholder="Seu e-mail">
+                        <button type="submit" class="cta-button" style="width: 100%;">Inscrever</button>
+                    </form>
+                </div--->
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2023 do.not.br - Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
